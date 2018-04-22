@@ -7,7 +7,7 @@
 #include "DHTesp.h"
 
 #define ssid "abc"
-#define password "khongcopass"
+#define password "123456789"
 #define mqtt_server "m14.cloudmqtt.com"
 #define mqtt_topic_pub "Topic"
 #define mqtt_topic_sub "Client-parse"
@@ -123,15 +123,17 @@ void loop() {
     float doamdat = 100.0-float(analogRead(A0))/1023.0*100.0;
     float humidity = dht.getHumidity();  
     float temperature = dht.getTemperature();
-    lastMsg = now;
-    root["temperature"] = temperature;
-    root["humidity"] =humidity;
-    root["soil-moisture"] = doamdat;
     if(isnan(humidity) || isnan(temperature)){
       isSuccess = false;
+      temperature = 0;
+      humidity = 0;
     }else {
       isSuccess = true;      
     }
+    lastMsg = now;
+    root["temperature"] = temperature;
+    root["humidity"] =humidity;
+    root["soilmoisture"] = doamdat;
     led.add(digitalRead(D4));
     led.add(digitalRead(D5));
     led.add(digitalRead(D6));
