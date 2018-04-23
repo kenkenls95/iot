@@ -1,7 +1,9 @@
-var mysql = require('mysql');
-var mqtt = require('mqtt');
-// var express = require('express');
-// var app = express();
+var mysql      = require('mysql');
+var mqtt       = require('mqtt');
+var express    = require('express');        
+var app        = express();                 
+var bodyParser = require('body-parser');
+
 
 // ===============Setup MQTT Broker==============
 const client = mqtt.connect("mqtt://m14.cloudmqtt.com", {
@@ -12,7 +14,7 @@ const client = mqtt.connect("mqtt://m14.cloudmqtt.com", {
 })
 client.on("connect", () => {
     client.subscribe("Topic")
-    client.publish("Client-parse");
+    client.subscribe("Remove")
     console.log("connected!")
 })
 client.on("error", (e) => {
@@ -24,6 +26,7 @@ client.on("close", (e) => {
 client.on("message", (topic, message) => {
     switch(topic) {
         case "Topic":  addSql(message); break;
+        case "Remove":  removeSql(message); break;
     }
 })
 
@@ -95,6 +98,31 @@ const addSoilmoisture = (soilmoisture) => {
 });
 }
 
+
+const removeSql = (data) => {
+  var key = JSON.parse(data)
+  if(key.remove === "on" ){
+  con.connect(function(err) {  
+  var sql = "TRUNCATE TABLE `tbl_humidity`";
+  con.query(sql, function (err, result) {    
+    console.log("Table humidity have been remove");
+  });
+  var sql = "TRUNCATE TABLE `tbl_temperature`";
+  con.query(sql, function (err, result) {    
+    console.log("Table temperature have been remove");
+  });
+  var sql = "TRUNCATE TABLE `tbl_soilmoisture`";
+  con.query(sql, function (err, result) {    
+    console.log("Table soilmoisture have been remove");
+  });
+  var sql = "TRUNCATE TABLE `tbl_led`";
+  con.query(sql, function (err, result) {    
+    console.log("Table led status have been remove");
+  });
+});
+}
+}
+
 const addLed = (led1,led2,led3,led4) =>{
   con.connect(function(err) {
   var now = new Date()
@@ -109,13 +137,24 @@ const addLed = (led1,led2,led3,led4) =>{
 
 // ============Setup API==========================
 
-// var server = app.listen('3000', function(){
-//   var host = server.address().address;
-//   var port = server.address.port();
-//   console.log("Server at 3000");
-// })
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
-
-// app.post('/doLed', function(req,res){
-
-// });
+var port = process.env.PORT || 8080;
+var router = express.Router(); 
+router.get('/', function(req, res) {
+    res.json({ message: 'hooray! welcome to our api!' });   
+});
+router.post('/doLed',function(req,res){
+    console.log("Message :",req.body)
+    var led1 = req.body.led[0];
+    var led2 = req.body.led[1];
+    var led3 = req.body.led[2];
+    var led4 = req.body.led[3];
+    var text = "{led:["+led1+","+led2+","+led3+","+led4+"]}"
+    client.publish("Client-parse",""+text+"");
+    
+    res.json({ message: 'send success' });
+});
+app.use('/api', router);
+app.listen(port);

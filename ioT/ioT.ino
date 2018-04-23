@@ -119,7 +119,7 @@ void loop() {
   }
   client.loop();
   long now = millis();// gán thời gian bây giờ là millis
-  if (now - lastMsg > 10000) {// Cái này là cứ 10s 
+  if (now - lastMsg > 30000) {// Cái này là cứ 30s 
     float doamdat = 100.0-float(analogRead(A0))/1023.0*100.0;
     float humidity = dht.getHumidity();  
     float temperature = dht.getTemperature();
