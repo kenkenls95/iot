@@ -6,8 +6,8 @@
 
 #include "DHTesp.h"
 
-#define ssid "abc"
-#define password "123456789"
+#define ssid "DUC HA"
+#define password "88888888"
 #define mqtt_server "m14.cloudmqtt.com"
 #define mqtt_topic_pub "Topic"
 #define mqtt_topic_sub "Client-parse"
