@@ -98,7 +98,8 @@
 			  <input type="checkbox" >
 			  <span class="slider round"></span>
 			</label><br><br>
-			<button>send</button>
+			<button class="send">send</button>
+			<button class="remove">remove data</button>
 		</div>
 	</div>
 
@@ -118,11 +119,10 @@
 		for(var i =0; i <= $(".switch > input").length;i++){
 			$(".switch > input").attr('checked',false);
 		}
-		console.log($(".switch > input")[0])
 
 		var led1,led2,led3,led4;
 		
-	    $("button").click(function(){
+	    $(".send").click(function(){
 	    	if($(".switch > input")[0].checked){
 				led1 =1;
 			}else{
@@ -143,14 +143,51 @@
 			}else{
 				led4 =0;
 			}
-	        $.post("http://localhost:8080/api/doLed",
+
+
+		
+	  	var linkPost = ""+$(location).attr('href')+"api/doLed";
+	  	var status = {};
+	  	status.led = [];
+	  	status.led[0]= led1;
+	  	status.led[1]= led2;
+	  	status.led[2]= led3;
+	  	status.led[3]= led4; 
+	  	
+	  	$.post(linkPost, status ,function(res){
+            if(res.success) {
+                swal(
+                    'Good job!',
+                    res.data.message,
+                    'success'
+                ).then(function() {
+                    location.reload();
+                });
+            } else {
+                swal(
+                    'Error',
+                    res.data.message,
+                    'error'
+                );
+            }
+        }, function(err){
+            NProgress.done();
+            swal(
+                'Error',
+                'Some error when saving product',
+                'error'
+            );
+        });
+	    });
+	    $(".remove").click(function(){
+	    	$.post(""+$(location).attr('href')+"api/remove",
 	        {
-	          led:[led1,led2,led3,led4]
+	          "remove":true
 	        },
 	        function(data,status){
-	            console.log("Data: " , data , "\nStatus: " , status);
+	            alert("Data: " + data + "\nStatus: " + status);
 	        });
-	    });
+	    })
 	});
 	</script>
 
